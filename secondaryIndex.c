@@ -4,8 +4,8 @@ void insertSecondaryIndex (SecondaryIdx data){
     FILE* idxSecondary;
     if (openFile(&idxSecondary, "secondaryIdx.bin", "rb+")){
         fseek(idxSecondary, 0, SEEK_END);
-        fwrite(data.author, sizeof(char), strlen(data.author), idxSecondary);
-        fwrite(&data.id, sizeof(int), 1, idxSecondary);
+        fwrite(data.author, sizeof(data), strlen(data.author), idxSecondary);
+        fwrite(&data.id, sizeof(data), 1, idxSecondary);
         fclose(idxSecondary);
     }
 }
@@ -26,6 +26,34 @@ void insertSecondaryIndex (SecondaryIdx data){
     }
 } */
 
+int* searchByAuthor(const char* author){
+    FILE* idxSecondary;
+    int* id = NULL;
+    int count = 0; 
+    SecondaryIdx data;
+    
+    if (openFile(&idxSecondary, "secondaryIdx.bin", "rb")){
+        while (fread(&data, sizeof(SecondaryIdx), 1, idxSecondary)){
+            if (strcmp(data.author, author) == 0) {
+                count++;
+                int* tmp = realloc(id, count * sizeof(int));
+                if (tmp == NULL) {
+                    fclose(idxSecondary);
+                    return NULL;
+                }
+                id = tmp;
+                id[count-1] = data.id; 
+            }
+        }        fclose(idxSecondary);
+    }
+    
+    if (count == 0) {
+        printf("não encontrado");
+        free(id);
+        return NULL;
+    }   
+    return id;
+}
 void readAllData() {
     FILE* idxSecondary;
     if (openFile(&idxSecondary, "secondaryIdx.bin", "rb")) {

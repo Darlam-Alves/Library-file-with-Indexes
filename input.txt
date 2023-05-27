@@ -2,10 +2,19 @@ ADD id='5' titulo='The Diary of a Young Girl' autor='Anne Frank'
 ADD id='3' titulo='The Fault in Our Stars' autor='John Green'
 REMOVE autor='Anne Frank'
 REMOVE autor='John Green'
+ADD id='22' titulo='Dias perdidos' autor='Lucio Cardoso'
 ADD id='14' titulo='Looking for Alaska' autor='John Green'
 ADD id='15' titulo='Harry Potter' autor='J.K Rowling'
+ADD id='76' titulo='Maria' autor='J.K Rowling'
+ADD id='25' titulo='Joaquina' autor='J.K Rowling'
+ADD id='23' titulo='Tomás' autor='Clarice'
+SEARCH autor='Lucio Cardoso'
 SEARCH id='5'
 REMOVE id='10'
-ADD id='14' titulo='Dias perdidos' autor='Lucio Cardoso'
-SEARCH autor='John Green'
 EXIT
+
+5The Diary of a Young Girl|Anne Frank#
+3The Fault in Our Stars|John Green#
+14Looking for Alaska|John Green#
+15Harry Potter|J.K Rowling#
+76Maria|J.K Rowling#

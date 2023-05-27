@@ -3,7 +3,6 @@
 int main(){
     char **data;
     int totalData = 0;
-    PrimaryIdx* head = NULL;
    
     data = malloc(sizeof(char *) * NUM_RECORDS);
     readString(&data[totalData]);
@@ -91,12 +90,26 @@ void removeData(char* data){
 }
 void searchData(char* data){
    if (strstr(data, "autor=") != NULL){
+        int* ids;
         char* author = extractAuthor(data);
-        //searchByAuthor(author); 
-        readAllData();
+        ids = searchByAuthor(author); 
+        if (ids == NULL) {
+            printf("Nao encontrado");
+        } else {
+            // Do something with the IDs here
+            for (int i = 0; ids[i] != '\0'; i++) {
+                //printf("Matching ID: %d\n", ids[i]);
+            }
+            free(ids);
+        }
         free(author);
    } else if (strstr(data, "id=") != NULL){
        int id = extractID(data);
+       long byteOffSet = searchByID(id);
+       //printf ("id = %d", id);
+       printf("%ld", byteOffSet);
+       //pesquisa no arquivo de dados
+
    }
 }
 char* extractAuthor(char* data){

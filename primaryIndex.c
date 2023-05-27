@@ -34,15 +34,14 @@ void freePrimaryIndex(PrimaryIdx** head) {
 
 void insertPrimaryIndex(PrimaryIdx* head) {
     PrimaryIdx* current = head;
-
-    if (current == NULL) 
+    
+    if (current == NULL)
         return;
     
-    FILE* idxPrimary;
-
-    if (openFile(&idxPrimary, "primaryIdx.bin", "wb")) {
+    FILE* idxPrimary = fopen("primaryIdx.bin", "wb");
+    
+    if (idxPrimary != NULL) {
         while (current != NULL) {
-            printf("%d\n", current->id);
             fseek(idxPrimary, 0, SEEK_END);
             fwrite(&current->id, sizeof(int), 1, idxPrimary);
             fwrite(&current->byteOffset, sizeof(long), 1, idxPrimary);
@@ -52,21 +51,40 @@ void insertPrimaryIndex(PrimaryIdx* head) {
     }
 }
 
-/* void traversal(PrimaryIdx* head){
-    PrimaryIdx* aux = head;
-    while (aux != NULL){
-        printf("%d\n", aux->id);
-        aux = aux->next;
+long searchByID(int id) {
+    FILE* file = fopen("primaryIdx.bin", "rb");
+    
+    if (file == NULL)
+        return -1;
+    
+    fseek(file, 0, SEEK_END);
+    long fileSize = ftell(file);
+    long numRecords = fileSize / (sizeof(int) + sizeof(long));
+    
+    long start = 0;
+    long end = numRecords - 1;
+    long byteOffset = -1;
+    
+    while (start <= end) {
+        long mid = (start + end) / 2;
+        
+        fseek(file, mid * (sizeof(int) + sizeof(long)), SEEK_SET);
+        
+        int recordId;
+        fread(&recordId, sizeof(int), 1, file);
+        if (recordId == id) {
+            fread(&byteOffset, sizeof(long), 1, file);
+            break;
+        }
+        else if (recordId < id) {
+            start = mid + 1;
+        }
+        else {
+            end = mid - 1;
+        }
     }
-} */
-
-
-/* void insertPrimaryIndex (int id, long byteOffSet){
-    FILE* idxPrimary; 
-    if (openFile(&idxPrimary, "primaryIdx.bin", "rb+")){
-        fseek(idxPrimary, 0, SEEK_END);
-        fwrite(&id, sizeof(int), 1, idxPrimary);
-        fwrite(&byteOffSet, sizeof(long), 1, idxPrimary);
-        fclose(idxPrimary);
-    }
-} */
+    
+    fclose(file);
+    
+    return byteOffset;
+}
