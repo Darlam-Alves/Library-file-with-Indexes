@@ -1,4 +1,4 @@
-#include "dataManipulator.h"
+#include "dataFile.h"
 
 int main(){
     char **data;
@@ -57,8 +57,9 @@ void executeOperations (char** operations, char** data, int size){
     FILE* dataFile; 
     FILE* idxPrimary; 
     FILE* idxSecondary;
+
     createFiles(&dataFile, &idxPrimary, &idxSecondary);
-    PrimaryIdx* head = NULL; 
+
     for (int i = 0; i < size; i++){
         if(strcmp(operations[i], "ADD") == 0){
             BookRecord book = extractData(data[i]);

@@ -15,10 +15,9 @@ int openFile(FILE **arq, const char* fileName, char *type){
 
 void insertDataFile(BookRecord book) {
     static PrimaryIdx* head = NULL;
-    static PrimaryIdx* aux = NULL; 
-    SecondaryIdx data; 
-    data.id = book.id;
-    strcpy(data.author, book.author);
+    // SecondaryIdx data; 
+    // data.id = book.id;
+    // strcpy(data.author, book.author);
  
     FILE* dataFile;
     if (openFile(&dataFile, "dataFile.bin", "rb+")) {
@@ -26,12 +25,11 @@ void insertDataFile(BookRecord book) {
         fseek(dataFile, 0, SEEK_END);
         writeData(dataFile, book);
 
-        createNode(&aux, book.id, ftell(dataFile)); 
-        insertSecondaryIndex(data);
-        head = aux;
-        insertPrimaryIndex(&head);
-        freePrimaryIndex(&aux);
-
+        createNode(&head, book.id, ftell(dataFile)); 
+        // insertSecondaryIndex(data);
+        // head = aux;
+        insertPrimaryIndex(head);
+        
         fclose(dataFile);
     }
 }
