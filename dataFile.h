@@ -18,3 +18,6 @@ void createNode(PrimaryIdx** head, int id, long byteOffset);
 void freePrimaryIndex(PrimaryIdx** head);
 int* searchByAuthor(const char* author);
 void writeData(FILE* dataFile, BookRecord book);
+void searchRegister(long byteOffset);
+void removeRegister(long byteOffset);
+int checkDuplicateID(PrimaryIdx* head, int newID);

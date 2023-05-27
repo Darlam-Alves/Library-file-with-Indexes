@@ -86,6 +86,8 @@ void removeData(char* data){
         free(author);
    } else if (strstr(data, "id=") != NULL){
         int id = extractID(data);
+        long byteOffSet = searchByID(id);
+        removeRegister(byteOffSet);
    }
 }
 void searchData(char* data){
@@ -106,10 +108,10 @@ void searchData(char* data){
    } else if (strstr(data, "id=") != NULL){
        int id = extractID(data);
        long byteOffSet = searchByID(id);
-       //printf ("id = %d", id);
-       printf("%ld", byteOffSet);
-       //pesquisa no arquivo de dados
-
+       if (byteOffSet == -1){
+         printf("Não encontrado");
+       }
+        searchRegister(byteOffSet);
    }
 }
 char* extractAuthor(char* data){
