@@ -1,7 +1,7 @@
 #include "dataFile.h"
 
 void createNode(PrimaryIdx** head, int id, long byteOffset) {
-    PrimaryIdx* newNode = (PrimaryIdx*)malloc(sizeof(PrimaryIdx));
+    PrimaryIdx* newNode = (PrimaryIdx*) malloc(sizeof(PrimaryIdx));
     newNode->id = id;
     newNode->byteOffset = byteOffset;
     newNode->next = NULL;
@@ -32,18 +32,21 @@ void freePrimaryIndex(PrimaryIdx** head) {
     *head = NULL;  
 }
 
-void insertPrimaryIndex(PrimaryIdx** head) {
-    if (*head == NULL) 
-        return; 
+void insertPrimaryIndex(PrimaryIdx* head) {
+    PrimaryIdx* current = head;
+
+    if (current == NULL) 
+        return;
     
     FILE* idxPrimary;
+
     if (openFile(&idxPrimary, "primaryIdx.bin", "wb")) {
-        while ((*head) != NULL) {
-            printf("%d\n", (*head)->id);
+        while (current != NULL) {
+            printf("%d\n", current->id);
             fseek(idxPrimary, 0, SEEK_END);
-            fwrite(&(*head)->id, sizeof(int), 1, idxPrimary);
-            fwrite(&(*head)->byteOffset, sizeof(long), 1, idxPrimary);
-            (*head) = (*head)->next;
+            fwrite(&current->id, sizeof(int), 1, idxPrimary);
+            fwrite(&current->byteOffset, sizeof(long), 1, idxPrimary);
+            current = current->next;
         }
         fclose(idxPrimary);
     }

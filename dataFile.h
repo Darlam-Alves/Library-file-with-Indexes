@@ -6,7 +6,7 @@
 void readAllData();
 void insertDataFile(BookRecord book);
 int openFile(FILE **arq, const char* fileName, char *type);
-void insertPrimaryIndex (PrimaryIdx** head);
+void insertPrimaryIndex (PrimaryIdx* head);
 void insertSecondaryIndex(SecondaryIdx data);
 void removeDatas (BookRecord book);
 void searchDatas (BookRecord book);
