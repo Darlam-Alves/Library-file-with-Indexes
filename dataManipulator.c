@@ -1,32 +1,7 @@
 #include "dataFile.h"
 
-int main(){
-    char **data;
-    int totalData = 0;
-   
-    data = malloc(sizeof(char *) * NUM_RECORDS);
-    readString(&data[totalData]);
-    while (strcmp(data[totalData], "EXIT") != 0){
-        totalData++;
-        readString(&data[totalData]);
-    }
-
-    char **operations = malloc(sizeof(char *) * totalData);
-    for (int i = 0; i < totalData; i++) 
-        operations[i] = typeofOperations(data[i]);
-    executeOperations(operations, data, totalData);
-   
-    for (int i = 0; i < totalData; i++)
-        free(data[i]);
-    free(data);
-
-     for (int i = 0; i < totalData; i++)
-        free(operations[i]);
-    free(operations);
-}
-
 void readBuffer(char *buffer, int bufferSize){
-    scanf(" %[^(\r|\n)]", buffer);
+    scanf(" %[^(\n|\r)]", buffer);
     buffer[strcspn(buffer, "\n")] = '\0';
 }
 
@@ -52,55 +27,95 @@ char* typeofOperations(char* operations) {
     return NULL;
 }
 
-void executeOperations (char** operations, char** data, int size){
-    FILE* dataFile; 
-    FILE* idxPrimary; 
+void executeOperations(char** operations, char** data, int size) {
+    FILE* dataFile;
+    FILE* idxPrimary;
     FILE* idxSecondary;
-
     createFiles(&dataFile, &idxPrimary, &idxSecondary);
 
-    for (int i = 0; i < size; i++){
-        if(strcmp(operations[i], "ADD") == 0){
+    for (int i = 0; i < size; i++) {
+        printLine();
+        if (strcmp(operations[i], "ADD") == 0) {
             BookRecord book = extractData(data[i]);
             insertDataFile(book);
-            free (book.title);
-            free (book.author);
-        }
-        if(strcmp(operations[i], "REMOVE") == 0){
+            free(book.title);
+            free(book.author);
+        } else if (strcmp(operations[i], "REMOVE") == 0) {
             removeData(data[i]);
-        }
-        if(strcmp(operations[i], "SEARCH") == 0){
+        } else if (strcmp(operations[i], "SEARCH") == 0) {
             searchData(data[i]);
-        }
-        if(strcmp(operations[i], "EXIT") == 0)
-            exit(0);
+        } 
     }
 
     fclose(dataFile);
     fclose(idxPrimary);
     fclose(idxSecondary);
 }
+
 void removeData(char* data){
    if (strstr(data, "autor=") != NULL){
-        char* author = extractAuthor(data);
-        free(author);
+      removeRecordsByAuthor(data);
    } else if (strstr(data, "id=") != NULL){
         int id = extractID(data);
         long byteOffSet = searchByID(id);
-        removeRegister(byteOffSet);
+        if (byteOffSet == -1){
+            printf ("Erro ao remover\n");
+        } else  
+            removeRegister(byteOffSet);
    }
 }
+void removeRecordsByAuthor(const char* data) {
+    if (strstr(data, "autor=") != NULL) {
+        int* ids;
+        char* author = extractAuthor(data);
+        ids = searchByAuthor(author);
+        if (ids == NULL) {
+            printf("Erro ao remover\n");
+        } else {
+            removeRecordsByIds(ids);
+            free(ids);
+        }
+        free(author);
+    }
+}
+void removeRecordsByIds(int* ids) {
+    for (int i = 0; ids[i] != -1; i++) {
+        long aux = searchByID(ids[i]);
+        long byteOffset = checkRecordExistence(aux);
+        if (byteOffset == -1) {
+            printf("Erro ao remover\n");
+            break;
+        } else {
+            removeRegister(byteOffset);
+        }
+    }
+}
+
 void searchData(char* data){
    if (strstr(data, "autor=") != NULL){
         int* ids;
         char* author = extractAuthor(data);
+        long byteOffSet;
+        long aux;
         ids = searchByAuthor(author); 
+        for (int i = 0; ids[i] != -1; i++){
+            aux = searchByID(ids[i]);
+            byteOffSet = checkRecordExistence(aux);
+        }
+        if (byteOffSet == -1){
+            ids = NULL;
+        }
         if (ids == NULL) {
-            printf("Nao encontrado");
+            printf("Não encontrado\n");
         } else {
-            // Do something with the IDs here
-            for (int i = 0; ids[i] != '\0'; i++) {
-                //printf("Matching ID: %d\n", ids[i]);
+            for (int i = 0; ids[i] != -1; i++) {
+                int target = ids[i];
+                byteOffSet = searchByID(target);
+                
+                if (byteOffSet == -1){
+                    printf("Não encontrado\n");
+                }
+                    searchRegister(byteOffSet);
             }
             free(ids);
         }
@@ -108,13 +123,15 @@ void searchData(char* data){
    } else if (strstr(data, "id=") != NULL){
        int id = extractID(data);
        long byteOffSet = searchByID(id);
-       if (byteOffSet == -1){
-         printf("Não encontrado");
+       if (byteOffSet != -1){
+         searchRegister(byteOffSet);
+       } else{
+         printf("Não encontrado\n");
+
        }
-        searchRegister(byteOffSet);
    }
 }
-char* extractAuthor(char* data){
+char* extractAuthor(const char* data){
     char buffer[BUFFER_SIZE];
     strcpy(buffer, data);
     strtok(buffer, "'");
@@ -137,30 +154,18 @@ int extractID(char* data){
 }
 BookRecord extractData(char* data){
     BookRecord book;
-    char buffer[BUFFER_SIZE], aux[BUFFER_SIZE];
-    char *token;
+    char id[BUFFER_SIZE];
+    char title[BUFFER_SIZE];
+    char author[BUFFER_SIZE];
+    sscanf (data, "ADD id = '%[^']' titulo = '%[^']' autor = '%[^']'", id, title, author);
+    
     char **datas = malloc(sizeof(char *) * DATA_SIZE);
-    int i = 0;
-    char *result = malloc(sizeof(char) * BUFFER_SIZE);
-    strcpy(buffer, data);
-    token = strtok(buffer, "'");
-    while (token != NULL){
-        strcpy(aux, strtok(NULL, "'"));
-        datas[i] = malloc(sizeof(char) * (strlen(aux) + 1));
-        token = strtok(NULL, "'");
-        strcpy(datas[i], aux);
-        i++;
-    }
-    book.id = atoi(datas[0]);
-    book.title = malloc(sizeof(char) * (strlen(datas[1]) + 1));
-    strcpy(book.title, datas[1]);
-    book.author = malloc(sizeof(char) * (strlen(datas[2]) + 1));
-    strcpy(book.author, datas[2]);
-
-    for (int j = 0; j < DATA_SIZE; j++)
-        free(datas[j]);
-    free(datas);
-    return book;
+    book.id = atoi(id);
+    book.title = malloc(sizeof(char) * (strlen(title) + 1));
+    strcpy(book.title, title);
+    book.author = malloc(sizeof(char) * (strlen(author) + 1));
+    strcpy(book.author, author);
+    return book; 
 }
 
 int createFiles(FILE** dataFile, FILE** idxPrimary, FILE** idxSecondary) {
@@ -180,3 +185,6 @@ int createFiles(FILE** dataFile, FILE** idxPrimary, FILE** idxSecondary) {
     return flag;
 }
 
+void printLine() {
+    printf("----------------------------------------------------------\n");
+}

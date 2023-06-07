@@ -4,6 +4,7 @@
 #define FALSE 0
 
 
+long checkRecordExistence(long byteOffSet);
 void readAllData();
 void insertDataFile(BookRecord book);
 int openFile(FILE **arq, const char* fileName, char *type);
@@ -21,3 +22,5 @@ void writeData(FILE* dataFile, BookRecord book);
 void searchRegister(long byteOffset);
 void removeRegister(long byteOffset);
 int checkDuplicateID(PrimaryIdx* head, int newID);
+void printLine();
+void removeRegisterIdxPrimary(int id);

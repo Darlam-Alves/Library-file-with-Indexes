@@ -76,15 +76,24 @@ long searchByID(int id) {
             fread(&byteOffset, sizeof(long), 1, file);
             break;
         }
-        else if (recordId < id) {
+        else if (recordId < id) 
             start = mid + 1;
-        }
-        else {
+        else 
             end = mid - 1;
-        }
     }
     
     fclose(file);
     
     return byteOffset;
+}
+
+void removeRegisterIdxPrimary(int id){
+    FILE* arq; 
+    if (openFile(&arq, "idxPrimary.bin", "wb")){
+        long byteOffSet = searchByID(id);
+        fseek(arq, byteOffSet, SEEK_SET);
+        char marker[] = "|*";
+        fwrite(marker, sizeof(char), sizeof(marker), arq);
+        fclose(arq);
+    }
 }

@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_SIZE 100
+#define BUFFER_SIZE 150
 #define TRUE 1
 #define FALSE 0
 #define DATA_SIZE 3
 #define NUM_RECORDS 100
+#define MAX_STRING_SIZE 100
 
 typedef struct book{
     int id;
@@ -34,6 +35,8 @@ char* typeofOperations(char* operations);
 void executeOperations (char** operations, char** datas, int size);
 void removeData(char* data);
 void searchData(char* data);
-char* extractAuthor(char* data);
+char* extractAuthor(const char* data);
 int extractID(char* data);
 BookRecord extractData (char* data);
+void removeRecordsByIds(int* ids);
+void removeRecordsByAuthor(const char* data);

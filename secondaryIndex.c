@@ -9,49 +9,46 @@ void insertSecondaryIndex (SecondaryIdx data){
         fclose(idxSecondary);
     }
 }
-
-/* void searchByAuthor(const char* author) {
-    FILE* idxSecondary;
-    if (openFile(&idxSecondary, "secondaryIdx.bin", "rb+")) {
-        int id;
-        char currentAuthor[BUFFER_SIZE];
-        while (fread(&id, sizeof(int), 1, idxSecondary) == 1) {
-            fread(currentAuthor, sizeof(char), BUFFER_SIZE, idxSecondary);
-
-            if (strcmp(author, currentAuthor) == 0) {
-                printf("Author: %s, ID: %d\n", currentAuthor, id);
-            }
-        }
-        fclose(idxSecondary);
-    }
-} */
-
-int* searchByAuthor(const char* author){
+int* searchByAuthor(const char* author) {
     FILE* idxSecondary;
     int* id = NULL;
-    int count = 0; 
+    int count = 0;
     SecondaryIdx data;
-    
-    if (openFile(&idxSecondary, "secondaryIdx.bin", "rb")){
-        while (fread(&data, sizeof(SecondaryIdx), 1, idxSecondary)){
+
+    if (openFile(&idxSecondary, "secondaryIdx.bin", "rb")) {
+        while (fread(&data, sizeof(SecondaryIdx), 1, idxSecondary)) {
             if (strcmp(data.author, author) == 0) {
                 count++;
-                int* tmp = realloc(id, count * sizeof(int));
+                int* tmp = realloc(id, (count + 1) * sizeof(int));
                 if (tmp == NULL) {
                     fclose(idxSecondary);
+                    free(id);
                     return NULL;
                 }
                 id = tmp;
-                id[count-1] = data.id; 
+                id[count - 1] = data.id;
             }
-        }        fclose(idxSecondary);
+        }
+
+        fclose(idxSecondary);
     }
-    
+
     if (count == 0) {
-        printf("não encontrado");
+        // Não foram encontrados IDs correspondentes
         free(id);
         return NULL;
-    }   
+    }
+
+    // Adicionar valor -1 manualmente ao final do array de IDs
+    int* tmp = realloc(id, (count + 1) * sizeof(int));
+    if (tmp == NULL) {
+        // Gerenciar o erro de realocação de memória
+        free(id);
+        return NULL;
+    }
+    id = tmp;
+    id[count] = -1;
+
     return id;
 }
 void readAllData() {
